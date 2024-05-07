@@ -3,12 +3,12 @@
     {
       "name": "iane",
       "path": "/users/ianeblack/.ssh/id_rsa",
-      "current": false
+      "current": true
     },
     {
       "name": "clooles",
       "path": "/users/ianeblack/.ssh/clooles_rsa",
-      "current": true
+      "current": false
     }
   ]
 }
