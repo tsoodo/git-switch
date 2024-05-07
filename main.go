@@ -76,7 +76,8 @@ func main() {
 		return
 	}
 
-	fmt.Println("Hello", currentProfile.Name)
+  fmt.Println("\nHello \033[34m" + currentProfile.Name + "\033[0m\n")
+
 }
 
 func updateConfig(profile Profile) {
