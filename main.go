@@ -21,7 +21,7 @@ type ProfilesList struct {
 
 func main() {
 	// Open profiles for reading
-	file, err := os.Open(".profiles.json")
+	file, err := os.Open("/Users/ianeblack/.profiles.json")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -42,11 +42,15 @@ func main() {
 		return
 	}
 
+  // Switched to
+  var currentProfile Profile
+
 	// Hot-swap profile depending on current
 	for i := range myProfiles.Profiles {
 		myProfiles.Profiles[i].Current = !myProfiles.Profiles[i].Current
     if myProfiles.Profiles[i].Current == true {
       updateConfig(myProfiles.Profiles[i])
+      currentProfile = myProfiles.Profiles[i]
     }
 	}
 
@@ -58,7 +62,7 @@ func main() {
 	}
 
 	// Open file for writing (this will truncate the file if it exists)
-	file, err = os.OpenFile(".profiles.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	file, err = os.OpenFile("/Users/ianeblack/.profiles.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		fmt.Println("Error opening file for writing:", err)
 		return
@@ -72,7 +76,7 @@ func main() {
 		return
 	}
 
-	fmt.Println("JSON data updated and written back to file successfully")
+	fmt.Println("Hello", currentProfile.Name)
 }
 
 func updateConfig(profile Profile) {
