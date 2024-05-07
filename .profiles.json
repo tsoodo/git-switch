@@ -1,0 +1,14 @@
+{
+  "Profiles": [
+    {
+      "name": "iane",
+      "path": "/users/ianeblack/.ssh/id_rsa",
+      "current": false
+    },
+    {
+      "name": "clooles",
+      "path": "/users/ianeblack/.ssh/clooles_rsa",
+      "current": true
+    }
+  ]
+}
