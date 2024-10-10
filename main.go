@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ type ProfilesList struct {
 }
 
 func main() {
+  clearScreen()
 	// Open profiles for reading
 	file, err := os.Open("/Users/ianeblack/.profiles.json")
 	if err != nil {
@@ -111,4 +113,10 @@ func updateConfig(profile Profile) {
 		return
 	}
 
+}
+
+func clearScreen() {
+  cmd := exec.Command("clear")
+  cmd.Stdout = os.Stdout
+  cmd.Run()
 }
