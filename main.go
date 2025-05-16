@@ -38,6 +38,11 @@ func main() {
 
 	switch args[0] {
 	case "setup":
+		// Check for help flag
+		if len(args) > 1 && (args[1] == "--help" || args[1] == "-h" || args[1] == "help") {
+			showSetupHelp()
+			return
+		}
 		setupFlow()
 	case "list":
 		listProfiles()
@@ -52,6 +57,20 @@ func main() {
 		showHelp()
 		os.Exit(1)
 	}
+}
+
+func showSetupHelp() {
+	fmt.Println(`gs setup - Set up a new Git profile
+
+USAGE:
+    gs setup
+
+This command will interactively prompt you for:
+    - Profile name (any descriptive name like "work" or "personal")
+    - Email address for git commits
+    - Path to SSH private key (e.g., ~/.ssh/id_rsa)
+
+The profile will be created and automatically set as current if it's your first profile.`)
 }
 
 func getConfigPath() (string, error) {
