@@ -1,0 +1,38 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.22.2
+    
+    - name: Build for macOS (Intel)
+      run: GOOS=darwin GOARCH=amd64 go build -o gs-darwin-amd64 main.go
+    
+    - name: Build for macOS (Apple Silicon)  
+      run: GOOS=darwin GOARCH=arm64 go build -o gs-darwin-arm64 main.go
+    
+    - name: Build for Linux (Intel)
+      run: GOOS=linux GOARCH=amd64 go build -o gs-linux-amd64 main.go
+    
+    - name: Build for Linux (ARM)
+      run: GOOS=linux GOARCH=arm64 go build -o gs-linux-arm64 main.go
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          gs-darwin-amd64
+          gs-darwin-arm64
+          gs-linux-amd64
+          gs-linux-arm64
