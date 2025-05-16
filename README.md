@@ -72,6 +72,27 @@ When you switch profiles, `gs` automatically:
 2. Updates `~/.ssh/config` to use the correct `IdentityFile` for github.com
 3. Marks the new profile as current in the configuration
 
+## Example Workflow
+
+```bash
+# Initial setup for work profile
+gs setup
+# Enter: Work, john@company.com, ~/.ssh/id_rsa_work
+
+# Setup personal profile  
+gs setup
+# Enter: Personal, john@personal.com, ~/.ssh/id_rsa_personal
+
+# Switch to work profile
+gs
+
+# Check current profiles
+gs list
+
+# Edit a profile
+gs edit
+```
+
 ## Configuration File Location
 
 - **macOS/Linux**: `~/.config/gs/profiles.json`
