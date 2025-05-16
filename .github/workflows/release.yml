@@ -5,16 +5,20 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       with:
-        go-version: 1.22.2
+        go-version: '1.22.2'
     
     - name: Build for macOS (Intel)
       run: GOOS=darwin GOARCH=amd64 go build -o gs-darwin-amd64 main.go
@@ -36,3 +40,6 @@ jobs:
           gs-darwin-arm64
           gs-linux-amd64
           gs-linux-arm64
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
