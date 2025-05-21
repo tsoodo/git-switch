@@ -2,6 +2,7 @@
 
 [![Rust](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml/badge.svg)](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml)
 [![Release](https://github.com/tsoodo/git-switch/actions/workflows/release.yml/badge.svg)](https://github.com/tsoodo/git-switch/actions/workflows/release.yml)
+[![wakatime](https://wakatime.com/badge/user/018bb5b7-2775-467e-80b5-4a754a579895/project/2c58357b-b098-4e34-aec3-373e861486f7.svg)](https://wakatime.com/badge/user/018bb5b7-2775-467e-80b5-4a754a579895/project/2c58357b-b098-4e34-aec3-373e861486f7)
 
 # gs
 
