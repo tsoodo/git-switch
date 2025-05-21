@@ -1,3 +1,6 @@
+[![Rust](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml/badge.svg)](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml)
+
+
 # gs
 
 Switch between Git profiles instantly. A command-line tool that helps
