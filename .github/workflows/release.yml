@@ -25,18 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install stable Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
       
       - name: Build release binary
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+        run: cargo build --release
       
       - name: Rename binary
         shell: bash
@@ -59,13 +52,14 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -73,10 +67,9 @@ jobs:
           path: ./artifacts
       
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          name: gs ${{ steps.get_version.outputs.VERSION }}
+          name: gs ${{ env.VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
@@ -84,5 +77,3 @@ jobs:
             ./artifacts/gs-linux-amd64/gs-linux-amd64
             ./artifacts/gs-macos-amd64/gs-macos-amd64
             ./artifacts/gs-windows-amd64.exe/gs-windows-amd64.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
