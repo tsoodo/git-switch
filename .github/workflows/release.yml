@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build and Release
+  build-linux:
+    name: Build for Linux
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,10 +19,9 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-gnu,x86_64-apple-darwin,aarch64-apple-darwin,aarch64-unknown-linux-gnu
+          targets: x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu
 
-      - name: Install macOS cross-compilation tools
-        if: runner.os == 'Linux'
+      - name: Install ARM64 toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
@@ -36,33 +35,70 @@ jobs:
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
 
-      - name: Install macOS cross-compilation tools
-        uses: actions-rs/install@v0.1
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v3
         with:
-          crate: cross
-          use-tool-cache: true
+          name: linux-builds
+          path: |
+            target/x86_64-unknown-linux-gnu/release/gs
+            target/aarch64-unknown-linux-gnu/release/gs
+
+  build-macos:
+    name: Build for macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
 
       - name: Build for macOS (x86_64)
-        run: cross build --release --target x86_64-apple-darwin
+        run: cargo build --release --target x86_64-apple-darwin
 
       - name: Build for macOS (ARM64)
-        run: cross build --release --target aarch64-apple-darwin
+        run: cargo build --release --target aarch64-apple-darwin
 
-      - name: Rename binaries
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-builds
+          path: |
+            target/x86_64-apple-darwin/release/gs
+            target/aarch64-apple-darwin/release/gs
+
+  release:
+    name: Create Release
+    needs: [build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Prepare release files
         run: |
-          cp target/x86_64-unknown-linux-gnu/release/gs gs-linux-amd64
-          cp target/aarch64-unknown-linux-gnu/release/gs gs-linux-arm64
-          cp target/x86_64-apple-darwin/release/gs gs-darwin-amd64
-          cp target/aarch64-apple-darwin/release/gs gs-darwin-arm64
+          mkdir release-files
+          cp artifacts/linux-builds/x86_64-unknown-linux-gnu/release/gs release-files/gs-linux-amd64
+          cp artifacts/linux-builds/aarch64-unknown-linux-gnu/release/gs release-files/gs-linux-arm64
+          cp artifacts/macos-builds/x86_64-apple-darwin/release/gs release-files/gs-darwin-amd64
+          cp artifacts/macos-builds/aarch64-apple-darwin/release/gs release-files/gs-darwin-arm64
+          chmod +x release-files/*
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            gs-darwin-amd64
-            gs-darwin-arm64
-            gs-linux-amd64
-            gs-linux-arm64
+            release-files/gs-darwin-amd64
+            release-files/gs-darwin-arm64
+            release-files/gs-linux-amd64
+            release-files/gs-linux-arm64
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
