@@ -1,6 +1,28 @@
 # gs
 
-Switch between Git profiles instantly.
+Switch between Git profiles instantly. A command-line tool that helps
+developers who work with multiple Git accounts (personal, work, open source)
+manage their identities seamlessly.
+
+## Why use gs?
+
+Managing multiple Git identities can be frustrating. If you've ever
+accidentally committed to a work project with your personal email or vice
+versa, you know the pain. Git's global config is convenient but problematic
+when switching contexts.
+
+`gs` solves this by letting you:
+
+- Define multiple Git profiles with different names, emails, and SSH keys
+- Switch between them with a single command
+- Automatically update both Git and SSH configurations
+- Keep your commit history clean and correctly attributed
+
+Perfect for developers who:
+- Work on both company and personal projects
+- Contribute to open source under different identities
+- Manage multiple clients or organizations
+- Need to maintain separate SSH keys for different services
 
 ## Features
 
