@@ -7,104 +7,56 @@ permissions:
   contents: write
 
 jobs:
-  # Build for Linux platforms
-  build-linux:
-    runs-on: ubuntu-latest
+  build-and-release:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary: gs-linux-amd64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            binary: gs-linux-arm64
+            cross: true
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary: gs-darwin-amd64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary: gs-darwin-arm64
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu
-      
-      - name: Run tests
-        run: cargo test --verbose
+          targets: ${{ matrix.target }}
           
-      - name: Install ARM64 toolchain
+      - name: Install cross-compilation dependencies
+        if: matrix.cross
         run: |
           sudo apt-get update
           sudo apt-get install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
           
-      - name: Build for Linux (x86_64)
-        run: cargo build --release --target x86_64-unknown-linux-gnu
-        
-      - name: Build for Linux (ARM64)
-        run: |
-          cargo build --release --target aarch64-unknown-linux-gnu
+      - name: Run tests
+        if: matrix.os == 'ubuntu-latest' && matrix.target == 'x86_64-unknown-linux-gnu'
+        run: cargo test --verbose
+          
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
         env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.cross && 'aarch64-linux-gnu-gcc' || '' }}
           
-      - name: Prepare artifacts
+      - name: Prepare binary
         run: |
-          mkdir -p artifacts
-          cp target/x86_64-unknown-linux-gnu/release/gs artifacts/gs-linux-amd64
-          cp target/aarch64-unknown-linux-gnu/release/gs artifacts/gs-linux-arm64
-          chmod +x artifacts/*
+          mkdir -p release-binaries
+          cp target/${{ matrix.target }}/release/gs release-binaries/${{ matrix.binary }}
+          chmod +x release-binaries/${{ matrix.binary }}
           
-      - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4  # Updated to v4
-        with:
-          name: linux-builds
-          path: artifacts/
-          if-no-files-found: error
-
-  # Build for macOS platforms
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-apple-darwin,aarch64-apple-darwin
-          
-      - name: Build for macOS (x86_64)
-        run: cargo build --release --target x86_64-apple-darwin
-        
-      - name: Build for macOS (ARM64)
-        run: cargo build --release --target aarch64-apple-darwin
-        
-      - name: Prepare artifacts
-        run: |
-          mkdir -p artifacts
-          cp target/x86_64-apple-darwin/release/gs artifacts/gs-darwin-amd64
-          cp target/aarch64-apple-darwin/release/gs artifacts/gs-darwin-arm64
-          chmod +x artifacts/*
-          
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4  # Updated to v4
-        with:
-          name: macos-builds
-          path: artifacts/
-          if-no-files-found: error
-
-  # Create the GitHub release with all builds
-  release:
-    name: Create Release
-    needs: [build-linux, build-macos]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4  # Updated to v4
-        with:
-          path: downloaded-artifacts
-          
-      - name: Prepare release files
-        run: |
-          mkdir -p release-files
-          cp downloaded-artifacts/linux-builds/gs-linux-amd64 release-files/
-          cp downloaded-artifacts/linux-builds/gs-linux-arm64 release-files/
-          cp downloaded-artifacts/macos-builds/gs-darwin-amd64 release-files/
-          cp downloaded-artifacts/macos-builds/gs-darwin-arm64 release-files/
-          chmod +x release-files/*
-          ls -la release-files/
-          
-      - name: Create Release
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: release-files/*
+          files: release-binaries/${{ matrix.binary }}
           generate_release_notes: true
