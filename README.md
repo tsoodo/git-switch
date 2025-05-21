@@ -1,3 +1,5 @@
+![git switch banner](./gs.png)
+
 [![Rust](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml/badge.svg)](https://github.com/tsoodo/git-switch/actions/workflows/rust.yml)
 [![Release](https://github.com/tsoodo/git-switch/actions/workflows/release.yml/badge.svg)](https://github.com/tsoodo/git-switch/actions/workflows/release.yml)
 
