@@ -130,7 +130,7 @@ fn switch_profile() -> Result<()> {
     clear_screen();
     println!(
         "Switched to profile: {} ({})",
-        new_profile.name.blue(),
+        new_profile.name.bright_green(),
         new_profile.email
     );
 
